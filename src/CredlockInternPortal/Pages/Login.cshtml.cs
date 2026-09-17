@@ -2,6 +2,8 @@ using CredlockInternPortal.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 
+namespace CredlockInternPortal.Pages;
+
 public class LoginModel : PageModel
 {
     private readonly AuthService _auth;
