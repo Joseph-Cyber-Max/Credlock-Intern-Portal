@@ -1,0 +1,21 @@
+@page
+@model LoginModel
+@{
+    ViewData["Title"] = "Sign in";
+}
+<div class="auth-shell">
+    <div class="auth-card">
+        <div class="brand-mark">C</div>
+        <h1>Credlock Intern Portal</h1>
+        <p class="muted">Sign in to manage your internship journey.</p>
+        @if (!string.IsNullOrWhiteSpace(Model.ErrorMessage)) { <div class="alert">@Model.ErrorMessage</div> }
+        <form method="post">
+            <label>Email</label>
+            <input asp-for="Email" type="email" autocomplete="username" required />
+            <label>Password</label>
+            <input asp-for="Password" type="password" autocomplete="current-password" required />
+            <button class="primary" type="submit">Sign in</button>
+        </form>
+        <small>Demo administrator: admin@credlock.africa / Admin@123</small>
+    </div>
+</div>
