@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - Credlock Intern Portal</title>
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+</head>
+<body>
+    <header class="topbar">
+        <div class="brand">
+            <div class="brand-mark">C</div>
+            <div>
+                <div class="brand-name">Credlock</div>
+                <div class="brand-subtitle">Intern Portal</div>
+            </div>
+        </div>
+        <nav class="nav-links">
+            <a asp-page="/Index">Dashboard</a>
+            <a href="#features">Features</a>
+        </nav>
+    </header>
+
+    <main class="container">
+        @RenderBody()
+    </main>
+
+    <footer class="footer">
+        <span>Credlock Intern Portal</span>
+        <span>Built with ASP.NET Core</span>
+    </footer>
+
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>
