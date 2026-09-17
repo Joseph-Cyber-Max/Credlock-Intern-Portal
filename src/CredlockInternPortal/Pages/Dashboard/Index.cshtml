@@ -1,0 +1,26 @@
+@page
+@model DashboardModel
+@{
+    ViewData["Title"] = "Dashboard";
+}
+<div class="dashboard-shell">
+    <header class="topbar">
+        <div><strong>Credlock</strong><span> Intern Portal</span></div>
+        <div>@Model.FullName <span class="role">@Model.Role</span> <a href="/Logout">Sign out</a></div>
+    </header>
+    <main class="dashboard-content">
+        <div class="welcome"><p>Overview</p><h1>Welcome back, @Model.FirstName</h1><span>Track internship activity, learning and performance from one place.</span></div>
+        <section class="stats">
+            <div><small>Active Interns</small><b>24</b><span>Current programme</span></div>
+            <div><small>Attendance</small><b>94%</b><span>This month</span></div>
+            <div><small>Tasks Completed</small><b>86%</b><span>Programme average</span></div>
+            <div><small>Learning Progress</small><b>72%</b><span>12-week programme</span></div>
+        </section>
+        <section class="panel-grid">
+            <article><h2>Internship Management</h2><p>Register interns, maintain profiles and manage placements.</p><a href="#">Open module →</a></article>
+            <article><h2>Attendance</h2><p>Record check-ins, check-outs and attendance history.</p><a href="#">Open module →</a></article>
+            <article><h2>Learning Plan</h2><p>Follow weekly learning tracks and programme milestones.</p><a href="#">Open module →</a></article>
+            <article><h2>Tasks & Assessments</h2><p>Assign work, review submissions and track performance.</p><a href="#">Open module →</a></article>
+        </section>
+    </main>
+</div>
