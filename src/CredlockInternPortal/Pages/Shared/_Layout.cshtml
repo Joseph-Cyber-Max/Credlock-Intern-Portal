@@ -1,3 +1,12 @@
+@{
+    var currentPage = ViewContext.RouteData.Values["page"]?.ToString() ?? "";
+    var fullName = Context.Session.GetString("FullName") ?? "User";
+    var role = Context.Session.GetString("Role") ?? "";
+    var isManagement = role.Equals("Admin", StringComparison.OrdinalIgnoreCase)
+        || role.Equals("HR", StringComparison.OrdinalIgnoreCase)
+        || role.Equals("Supervisor", StringComparison.OrdinalIgnoreCase);
+    string Active(string page) => currentPage.Equals(page, StringComparison.OrdinalIgnoreCase) ? "active" : "";
+}
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -5,31 +14,106 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>@ViewData["Title"] - Credlock Intern Portal</title>
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <style>
+        .portal-nav-toggle{display:none;border:1px solid #e5eaf1;background:#fff;width:40px;height:40px;border-radius:12px;cursor:pointer;font-size:1.1rem;color:#162033}
+        .portal-backdrop{display:none}
+        .portal-scroll{overflow:auto;flex:1}
+        .portal-section{margin-top:4px}
+        .portal-signout{color:#e7a0a0!important}
+        .portal-signout:hover{background:#3a2027!important;color:#fff!important}
+        @media(max-width:1000px){
+            .portal-nav-toggle{display:grid;place-items:center}
+            .portal-sidebar{transform:translateX(-105%);transition:transform .22s ease;z-index:30;box-shadow:15px 0 40px rgba(0,0,0,.18)}
+            .portal-sidebar.open{transform:translateX(0)}
+            .portal-backdrop{position:fixed;inset:0;background:rgba(10,17,29,.42);z-index:20}
+            .portal-backdrop.open{display:block}
+        }
+    </style>
 </head>
 <body>
-    <header class="topbar">
-        <div class="brand">
+<div class="app-shell">
+    <aside class="sidebar portal-sidebar" id="portalSidebar">
+        <div class="sidebar-brand">
             <div class="brand-mark">C</div>
-            <div>
-                <div class="brand-name">Credlock</div>
-                <div class="brand-subtitle">Intern Portal</div>
-            </div>
+            <div><strong>Credlock</strong><small>Intern Portal</small></div>
         </div>
-        <nav class="nav-links">
-            <a asp-page="/Index">Dashboard</a>
-            <a href="#features">Features</a>
-        </nav>
-    </header>
+        <div class="portal-scroll">
+            <div class="side-label">WORKSPACE</div>
+            <nav class="side-nav">
+                <a class="@Active("/Dashboard/Index")" href="/Dashboard"><span>⌂</span>Overview</a>
+                <a class="@Active("/Interns")" href="/Interns"><span>◉</span>Interns</a>
+                <a class="@Active("/Attendance")" href="/Attendance"><span>✓</span>Attendance</a>
+                <a class="@Active("/Learning")" href="/Learning"><span>▣</span>Learning Plan</a>
+                <a class="@Active("/Tasks")" href="/Tasks"><span>□</span>Tasks &amp; Projects</a>
+                <a class="@Active("/Assessments")" href="/Assessments"><span>◇</span>Assessments</a>
+                <a class="@Active("/Reports")" href="/Reports"><span>▤</span>Reports</a>
+            </nav>
 
-    <main class="container">
-        @RenderBody()
+            <div class="side-label">TRAINING &amp; SUPPORT</div>
+            <nav class="side-nav">
+                <a class="@Active("/TechnicalSupport")" href="/TechnicalSupport"><span>⌁</span>Support Lab</a>
+                <a class="@Active("/Cybersecurity")" href="/Cybersecurity"><span>⌾</span>Cybersecurity</a>
+                <a class="@Active("/KnowledgeBase")" href="/KnowledgeBase"><span>?</span>Knowledge Base</a>
+            </nav>
+
+            @if (isManagement)
+            {
+                <div class="side-label">MANAGEMENT</div>
+                <nav class="side-nav">
+                    <a href="/Interns"><span>♙</span>Manage Interns</a>
+                    <a href="/Reports"><span>▥</span>Performance Reports</a>
+                    <a href="/Assessments"><span>◈</span>Question Bank</a>
+                </nav>
+            }
+        </div>
+        <div class="sidebar-footer">
+            <span class="online-dot"></span>Signed in as @role<br />
+            <a class="portal-signout" href="/Logout">Sign out</a>
+        </div>
+    </aside>
+
+    <div class="portal-backdrop" id="portalBackdrop"></div>
+    <main class="app-main">
+        <header class="app-topbar">
+            <div style="display:flex;align-items:center;gap:12px;min-width:0">
+                <button class="portal-nav-toggle" id="portalNavToggle" type="button" aria-label="Open navigation" aria-controls="portalSidebar" aria-expanded="false">☰</button>
+                <div>
+                    <div class="page-kicker">CREDLOCK AFRICA</div>
+                    <h1>@ViewData["Title"]</h1>
+                </div>
+            </div>
+            <div class="user-area">
+                <div class="user-copy"><strong>@fullName</strong><small>@role</small></div>
+                <div class="avatar">@(string.IsNullOrWhiteSpace(fullName) ? "U" : fullName.Trim()[0].ToString().ToUpperInvariant())</div>
+            </div>
+        </header>
+
+        <div>
+            @RenderBody()
+        </div>
     </main>
+</div>
 
-    <footer class="footer">
-        <span>Credlock Intern Portal</span>
-        <span>Built with ASP.NET Core</span>
-    </footer>
-
-    @await RenderSectionAsync("Scripts", required: false)
+<script>
+(function () {
+    const toggle = document.getElementById('portalNavToggle');
+    const sidebar = document.getElementById('portalSidebar');
+    const backdrop = document.getElementById('portalBackdrop');
+    if (!toggle || !sidebar || !backdrop) return;
+    function closeNav() {
+        sidebar.classList.remove('open');
+        backdrop.classList.remove('open');
+        toggle.setAttribute('aria-expanded', 'false');
+    }
+    toggle.addEventListener('click', function () {
+        const open = sidebar.classList.toggle('open');
+        backdrop.classList.toggle('open', open);
+        toggle.setAttribute('aria-expanded', open ? 'true' : 'false');
+    });
+    backdrop.addEventListener('click', closeNav);
+    sidebar.querySelectorAll('a').forEach(a => a.addEventListener('click', closeNav));
+})();
+</script>
+@await RenderSectionAsync("Scripts", required: false)
 </body>
 </html>
