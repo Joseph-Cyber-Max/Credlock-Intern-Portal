@@ -2,25 +2,26 @@
 @model CredlockInternPortal.Pages.Dashboard.IndexModel
 @{
     ViewData["Title"] = "Dashboard";
+    Layout = "~/Pages/Shared/_LoginLayout.cshtml";
 }
-<div class="dashboard-shell">
-    <header class="topbar">
-        <div><strong>Credlock</strong><span> Intern Portal</span></div>
-        <div>@Model.FullName <span class="role">@Model.Role</span> <a href="/Logout">Sign out</a></div>
-    </header>
-    <main class="dashboard-content">
-        <div class="welcome"><p>Overview</p><h1>Welcome back, @Model.FirstName</h1><span>Track internship activity, learning and performance from one place.</span></div>
-        <section class="stats">
-            <div><small>Active Interns</small><b>24</b><span>Current programme</span></div>
-            <div><small>Attendance</small><b>94%</b><span>This month</span></div>
-            <div><small>Tasks Completed</small><b>86%</b><span>Programme average</span></div>
-            <div><small>Learning Progress</small><b>72%</b><span>12-week programme</span></div>
-        </section>
-        <section class="panel-grid">
-            <article><h2>Internship Management</h2><p>Register interns, maintain profiles and manage placements.</p><a href="#">Open module →</a></article>
-            <article><h2>Attendance</h2><p>Record check-ins, check-outs and attendance history.</p><a href="#">Open module →</a></article>
-            <article><h2>Learning Plan</h2><p>Follow weekly learning tracks and programme milestones.</p><a href="#">Open module →</a></article>
-            <article><h2>Tasks & Assessments</h2><p>Assign work, review submissions and track performance.</p><a href="#">Open module →</a></article>
-        </section>
+<div class="app-shell">
+    <aside class="sidebar">
+        <a class="sidebar-brand" href="/Dashboard"><span class="brand-mark">C</span><span><strong>Credlock</strong><small>Intern Portal</small></span></a>
+        <div class="side-label">WORKSPACE</div>
+        <nav class="side-nav">
+            <a class="active" href="/Dashboard"><span>⌂</span> Overview</a><a href="#"><span>◎</span> Interns</a><a href="#"><span>◷</span> Attendance</a><a href="#"><span>▣</span> Learning Plan</a><a href="#"><span>✓</span> Tasks</a><a href="#"><span>★</span> Assessments</a><a href="#"><span>▤</span> Reports</a>
+        </nav>
+        <div class="side-label">ADMINISTRATION</div><nav class="side-nav"><a href="#"><span>⚙</span> Settings</a><a href="/Logout"><span>↪</span> Sign out</a></nav>
+        <div class="sidebar-footer"><span class="online-dot"></span> Portal services online</div>
+    </aside>
+    <main class="app-main">
+        <header class="app-topbar"><div><div class="page-kicker">OVERVIEW</div><h1>Good day, @Model.FirstName</h1></div><div class="user-area"><button class="icon-button" aria-label="Notifications">♢<i></i></button><div class="avatar">@Model.FirstName.Substring(0,1).ToUpperInvariant()</div><div class="user-copy"><strong>@Model.FullName</strong><small>@Model.Role</small></div></div></header>
+        <div class="dashboard-body">
+            <section class="dashboard-hero"><div><span class="eyebrow">INTERNSHIP OPERATIONS</span><h2>Everything you need to keep the programme moving.</h2><p>Monitor intern activity, learning, attendance and performance from a single workspace.</p></div><div class="hero-orb"><span>12</span><small>week programme</small></div></section>
+            <section class="dashboard-stats"><article class="dash-stat"><div class="stat-icon">◉</div><span>Active interns</span><strong>24</strong><small>+4 this month</small></article><article class="dash-stat"><div class="stat-icon">◷</div><span>Attendance</span><strong>94%</strong><small>Monthly average</small></article><article class="dash-stat"><div class="stat-icon">✓</div><span>Tasks completed</span><strong>86%</strong><small>Programme average</small></article><article class="dash-stat"><div class="stat-icon">↗</div><span>Learning progress</span><strong>72%</strong><small>Across active interns</small></article></section>
+            <div class="content-grid"><section class="dashboard-card progress-card"><div class="card-heading"><div><span class="eyebrow">PROGRAMME HEALTH</span><h3>Internship progress</h3></div><a href="#">View report →</a></div><div class="progress-row"><div><span>Learning activities</span><strong>72%</strong></div><div class="progress-track"><span style="width:72%"></span></div></div><div class="progress-row"><div><span>Task completion</span><strong>86%</strong></div><div class="progress-track"><span style="width:86%"></span></div></div><div class="progress-row"><div><span>Attendance</span><strong>94%</strong></div><div class="progress-track"><span style="width:94%"></span></div></div></section>
+            <section class="dashboard-card quick-card"><div class="card-heading"><div><span class="eyebrow">QUICK ACTIONS</span><h3>Get things done</h3></div></div><div class="quick-grid"><a href="#"><b>+</b><span>Add intern</span></a><a href="#"><b>◷</b><span>Record attendance</span></a><a href="#"><b>✓</b><span>Assign task</span></a><a href="#"><b>▤</b><span>Generate report</span></a></div></section></div>
+            <section class="dashboard-card modules-card"><div class="card-heading"><div><span class="eyebrow">PORTAL MODULES</span><h3>Manage the internship lifecycle</h3></div></div><div class="module-grid"><a href="#"><b>01</b><div><strong>Intern Management</strong><p>Profiles, placements and supervisors</p></div><span>→</span></a><a href="#"><b>02</b><div><strong>Attendance</strong><p>Check-ins, absences and history</p></div><span>→</span></a><a href="#"><b>03</b><div><strong>Learning Plan</strong><p>Weekly goals and milestones</p></div><span>→</span></a><a href="#"><b>04</b><div><strong>Tasks & Assessments</strong><p>Assignments, reviews and scores</p></div><span>→</span></a></div></section>
+        </div>
     </main>
 </div>
