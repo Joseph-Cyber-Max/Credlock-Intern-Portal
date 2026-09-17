@@ -2,5 +2,5 @@
 @using CredlockInternPortal.Data
 @using Microsoft.EntityFrameworkCore
 @inject PortalDbContext Db
-@{ ViewData["Title"] = "Interns"; var interns = await Db.InternProfiles.Include(x => x.UserAccount).OrderBy(x => x.FullName).ToListAsync(); }
+@{ ViewData["Title"] = "Interns"; var interns = await Db.InternProfiles.Include(x => x.UserAccount).OrderBy(x => x.UserAccount!.FullName).ToListAsync(); }
 <div class="dashboard-body standalone-page"><div class="page-header"><span class="eyebrow">MANAGEMENT</span><h1>Interns</h1><p>Registered SIWES interns, placements and supervisors.</p></div><div class="dashboard-card table-card"><div class="table-scroll"><table><thead><tr><th>Intern ID</th><th>Name</th><th>Institution</th><th>Department</th><th>Supervisor</th><th>Status</th></tr></thead><tbody>@foreach (var intern in interns) { <tr><td>@intern.InternId</td><td>@intern.UserAccount?.FullName</td><td>@intern.Institution</td><td>@intern.Department</td><td>@intern.Supervisor</td><td><span class="status-pill">@(intern.IsActive ? "Active" : "Inactive")</span></td></tr> }</tbody></table></div></div><a class="back-link" href="/Dashboard">← Back to dashboard</a></div>
