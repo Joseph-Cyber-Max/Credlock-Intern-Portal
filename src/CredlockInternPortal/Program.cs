@@ -2,10 +2,7 @@ using CredlockInternPortal.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
-builder.Services.AddRazorPages(options =>
-{
-    options.Conventions.AuthorizeFolder("/Dashboard");
-});
+builder.Services.AddRazorPages();
 builder.Services.AddSingleton<AuthService>();
 builder.Services.AddSession(options =>
 {
