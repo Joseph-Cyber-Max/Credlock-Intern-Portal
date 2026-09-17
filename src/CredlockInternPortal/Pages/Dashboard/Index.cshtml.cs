@@ -1,7 +1,9 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 
-public class DashboardModel : PageModel
+namespace CredlockInternPortal.Pages.Dashboard;
+
+public class IndexModel : PageModel
 {
     public string FullName { get; private set; } = "";
     public string FirstName => string.IsNullOrWhiteSpace(FullName) ? "there" : FullName.Split(' ')[0];
