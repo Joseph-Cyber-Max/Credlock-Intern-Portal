@@ -4,20 +4,23 @@ using Microsoft.AspNetCore.Mvc.RazorPages;
 
 namespace CredlockInternPortal.Pages;
 
-public class LoginModel : PageModel
+public class LoginModel(AuthService auth) : PageModel
 {
-    private readonly AuthService _auth;
-    public LoginModel(AuthService auth) => _auth = auth;
-
     [BindProperty] public string Email { get; set; } = "";
     [BindProperty] public string Password { get; set; } = "";
     public string? ErrorMessage { get; set; }
 
     public void OnGet() { }
 
-    public IActionResult OnPost()
+    public async Task<IActionResult> OnPostAsync()
     {
-        var user = _auth.Authenticate(Email, Password);
+        if (string.IsNullOrWhiteSpace(Email) || string.IsNullOrWhiteSpace(Password))
+        {
+            ErrorMessage = "Email and password are required.";
+            return Page();
+        }
+
+        var user = await auth.AuthenticateAsync(Email, Password);
         if (user is null)
         {
             ErrorMessage = "Invalid email or password.";

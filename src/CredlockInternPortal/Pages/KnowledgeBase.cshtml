@@ -1,0 +1,6 @@
+@page
+@using CredlockInternPortal.Data
+@using Microsoft.EntityFrameworkCore
+@inject PortalDbContext Db
+@{ ViewData["Title"] = "Knowledge Base"; var articles = await Db.KnowledgeBaseArticles.Where(x => x.IsPublished).OrderBy(x => x.Category).ThenBy(x => x.Title).ToListAsync(); }
+<div class="dashboard-body standalone-page"><div class="page-header"><span class="eyebrow">KNOWLEDGE BASE / SOP</span><h1>Knowledge Base</h1><p>Approved support procedures and cybersecurity references for SIWES learning.</p></div><div class="module-list">@foreach (var a in articles) { <article class="dashboard-card module-item"><div class="week-number">@a.Category[..Math.Min(3, a.Category.Length)].ToUpper()</div><div><h3>@a.Title</h3><p>@a.Content</p></div></article> }</div><a class="back-link" href="/Dashboard">← Back to dashboard</a></div>
