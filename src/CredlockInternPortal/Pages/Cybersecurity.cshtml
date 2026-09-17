@@ -1,0 +1,6 @@
+@page
+@using CredlockInternPortal.Data
+@using Microsoft.EntityFrameworkCore
+@inject PortalDbContext Db
+@{ ViewData["Title"] = "Cybersecurity"; var articles = await Db.KnowledgeBaseArticles.Where(x => x.Category == "Cybersecurity" && x.IsPublished).OrderBy(x => x.Title).ToListAsync(); }
+<div class="dashboard-body standalone-page"><div class="page-header"><span class="eyebrow">SECURE SUPPORT</span><h1>Cybersecurity Training</h1><p>Build practical awareness around confidentiality, integrity, availability, authentication, least privilege, customer-data protection and incident response.</p></div><div class="module-list">@foreach (var a in articles) { <article class="dashboard-card module-item"><div class="week-number">SEC</div><div><h3>@a.Title</h3><p>@a.Content</p></div></article> }</div><a class="back-link" href="/Dashboard">← Back to dashboard</a></div>
