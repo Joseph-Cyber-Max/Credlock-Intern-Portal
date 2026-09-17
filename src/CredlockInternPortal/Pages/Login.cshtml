@@ -1,7 +1,8 @@
 @page
-@model LoginModel
+@model CredlockInternPortal.Pages.LoginModel
 @{
     ViewData["Title"] = "Sign in";
+    Layout = "~/Pages/Shared/_LoginLayout.cshtml";
 }
 <div class="auth-shell">
     <div class="auth-card">
@@ -10,12 +11,14 @@
         <p class="muted">Sign in to manage your internship journey.</p>
         @if (!string.IsNullOrWhiteSpace(Model.ErrorMessage)) { <div class="alert">@Model.ErrorMessage</div> }
         <form method="post">
-            <label>Email</label>
+            <label asp-for="Email">Email</label>
             <input asp-for="Email" type="email" autocomplete="username" required />
-            <label>Password</label>
+            <span asp-validation-for="Email" class="validation"></span>
+            <label asp-for="Password">Password</label>
             <input asp-for="Password" type="password" autocomplete="current-password" required />
+            <span asp-validation-for="Password" class="validation"></span>
             <button class="primary" type="submit">Sign in</button>
         </form>
-        <small>Demo administrator: admin@credlock.africa / Admin@123</small>
+        <small>Development account: admin@credlock.africa / Admin@123</small>
     </div>
 </div>
