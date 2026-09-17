@@ -18,10 +18,9 @@
         .portal-nav-toggle{display:none;border:1px solid #e5eaf1;background:#fff;width:40px;height:40px;border-radius:12px;cursor:pointer;font-size:1.1rem;color:#162033}
         .portal-backdrop{display:none}
         .portal-scroll{overflow:auto;flex:1}
-        .portal-section{margin-top:4px}
         .portal-signout{color:#e7a0a0!important}
         .portal-signout:hover{background:#3a2027!important;color:#fff!important}
-        @media(max-width:1000px){
+        @@media(max-width:1000px){
             .portal-nav-toggle{display:grid;place-items:center}
             .portal-sidebar{transform:translateX(-105%);transition:transform .22s ease;z-index:30;box-shadow:15px 0 40px rgba(0,0,0,.18)}
             .portal-sidebar.open{transform:translateX(0)}
@@ -48,14 +47,12 @@
                 <a class="@Active("/Assessments")" href="/Assessments"><span>◇</span>Assessments</a>
                 <a class="@Active("/Reports")" href="/Reports"><span>▤</span>Reports</a>
             </nav>
-
             <div class="side-label">TRAINING &amp; SUPPORT</div>
             <nav class="side-nav">
                 <a class="@Active("/TechnicalSupport")" href="/TechnicalSupport"><span>⌁</span>Support Lab</a>
                 <a class="@Active("/Cybersecurity")" href="/Cybersecurity"><span>⌾</span>Cybersecurity</a>
                 <a class="@Active("/KnowledgeBase")" href="/KnowledgeBase"><span>?</span>Knowledge Base</a>
             </nav>
-
             @if (isManagement)
             {
                 <div class="side-label">MANAGEMENT</div>
@@ -71,47 +68,28 @@
             <a class="portal-signout" href="/Logout">Sign out</a>
         </div>
     </aside>
-
     <div class="portal-backdrop" id="portalBackdrop"></div>
     <main class="app-main">
         <header class="app-topbar">
             <div style="display:flex;align-items:center;gap:12px;min-width:0">
                 <button class="portal-nav-toggle" id="portalNavToggle" type="button" aria-label="Open navigation" aria-controls="portalSidebar" aria-expanded="false">☰</button>
-                <div>
-                    <div class="page-kicker">CREDLOCK AFRICA</div>
-                    <h1>@ViewData["Title"]</h1>
-                </div>
+                <div><div class="page-kicker">CREDLOCK AFRICA</div><h1>@ViewData["Title"]</h1></div>
             </div>
-            <div class="user-area">
-                <div class="user-copy"><strong>@fullName</strong><small>@role</small></div>
-                <div class="avatar">@(string.IsNullOrWhiteSpace(fullName) ? "U" : fullName.Trim()[0].ToString().ToUpperInvariant())</div>
-            </div>
+            <div class="user-area"><div class="user-copy"><strong>@fullName</strong><small>@role</small></div><div class="avatar">@(string.IsNullOrWhiteSpace(fullName) ? "U" : fullName.Trim()[0].ToString().ToUpperInvariant())</div></div>
         </header>
-
-        <div>
-            @RenderBody()
-        </div>
+        @RenderBody()
     </main>
 </div>
-
 <script>
 (function () {
     const toggle = document.getElementById('portalNavToggle');
     const sidebar = document.getElementById('portalSidebar');
     const backdrop = document.getElementById('portalBackdrop');
     if (!toggle || !sidebar || !backdrop) return;
-    function closeNav() {
-        sidebar.classList.remove('open');
-        backdrop.classList.remove('open');
-        toggle.setAttribute('aria-expanded', 'false');
-    }
-    toggle.addEventListener('click', function () {
-        const open = sidebar.classList.toggle('open');
-        backdrop.classList.toggle('open', open);
-        toggle.setAttribute('aria-expanded', open ? 'true' : 'false');
-    });
-    backdrop.addEventListener('click', closeNav);
-    sidebar.querySelectorAll('a').forEach(a => a.addEventListener('click', closeNav));
+    function closeNav(){ sidebar.classList.remove('open'); backdrop.classList.remove('open'); toggle.setAttribute('aria-expanded','false'); }
+    toggle.addEventListener('click',function(){ const open=sidebar.classList.toggle('open'); backdrop.classList.toggle('open',open); toggle.setAttribute('aria-expanded',open?'true':'false'); });
+    backdrop.addEventListener('click',closeNav);
+    sidebar.querySelectorAll('a').forEach(a=>a.addEventListener('click',closeNav));
 })();
 </script>
 @await RenderSectionAsync("Scripts", required: false)
