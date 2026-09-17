@@ -1,0 +1,6 @@
+@page
+@using CredlockInternPortal.Data
+@using Microsoft.EntityFrameworkCore
+@inject PortalDbContext Db
+@{ ViewData["Title"] = "Learning Plan"; var weeks = await Db.TrainingWeeks.Include(x => x.Lessons).OrderBy(x => x.WeekNumber).ToListAsync(); }
+<div class="dashboard-body standalone-page"><div class="page-header"><span class="eyebrow">12-WEEK SIWES ROADMAP</span><h1>Learning Plan</h1><p>Work through the complete Credlock technical-support and cybersecurity programme.</p></div><div class="module-list">@foreach (var week in weeks) { <article class="dashboard-card module-item"><div class="week-number">@week.WeekNumber.ToString("00")</div><div><h3>Week @week.WeekNumber — @week.Title</h3><p>@week.Description</p><small>@week.Lessons.Count lessons</small></div></article> }</div><a class="back-link" href="/Dashboard">← Back to dashboard</a></div>
