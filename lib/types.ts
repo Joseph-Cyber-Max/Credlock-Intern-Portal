@@ -1,0 +1,1 @@
+export type Role="ADMIN"|"SUPERVISOR"|"HR"|"INTERN";export type Intern={id:number;name:string;email:string;department:string;startDate:string;status:"Active"|"Completed"|"Pending";progress:number;quizAverage:number;attendance:number};
