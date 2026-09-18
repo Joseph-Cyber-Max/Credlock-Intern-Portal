@@ -1,0 +1,1 @@
+export type Session={email:string;role:"ADMIN"|"SUPERVISOR"|"HR"|"INTERN";name:string};export function getSession():Session|null{if(typeof window==="undefined")return null;try{const s=localStorage.getItem("credlock_session");return s?JSON.parse(s):null}catch{return null}}export function signOut(){localStorage.removeItem("credlock_session");window.location.href="/login"}
