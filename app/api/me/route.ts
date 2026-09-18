@@ -1,0 +1,1 @@
+import{NextResponse}from"next/server";import{getServerSession}from"@/lib/server-session";export async function GET(){const s=await getServerSession();if(!s)return NextResponse.json({error:"Unauthorized"},{status:401});return NextResponse.json(s)}
