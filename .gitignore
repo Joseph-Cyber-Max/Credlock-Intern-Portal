@@ -1,8 +1,4 @@
-bin/
-obj/
-.vs/
-*.user
-*.userosscache
-*.suo
-*.userprefs
-appsettings.Development.json
+node_modules/
+.next/
+.env*
+*.log

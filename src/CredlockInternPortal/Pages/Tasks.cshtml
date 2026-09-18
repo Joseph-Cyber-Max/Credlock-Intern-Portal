@@ -1,5 +1,0 @@
-@page
-@using CredlockInternPortal.Data
-@inject PortalDbContext Db
-@{ ViewData["Title"] = "Tasks"; var projects = await Db.Projects.OrderBy(x => x.WeekNumber).ToListAsync(); }
-<div class="dashboard-body standalone-page"><div class="page-header"><span class="eyebrow">PRACTICAL WORK</span><h1>Tasks & Projects</h1><p>Assigned practical projects for the SIWES programme.</p></div><div class="module-list">@foreach (var p in projects) { <article class="dashboard-card module-item"><div class="week-number">W@p.WeekNumber</div><div><h3>@p.Title</h3><p>@p.Description</p><small>Due @p.DueDate.ToString("dd MMM yyyy")</small></div></article> }</div><a class="back-link" href="/Dashboard">← Back to dashboard</a></div>

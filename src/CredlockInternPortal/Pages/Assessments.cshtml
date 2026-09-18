@@ -1,6 +1,0 @@
-@page
-@using CredlockInternPortal.Data
-@using Microsoft.EntityFrameworkCore
-@inject PortalDbContext Db
-@{ ViewData["Title"] = "Assessments"; var attempts = await Db.QuizAttempts.Include(x => x.Quiz).Include(x => x.InternProfile).ThenInclude(x => x.UserAccount).OrderByDescending(x => x.SubmittedAt).Take(50).ToListAsync(); }
-<div class="dashboard-body standalone-page"><div class="page-header"><span class="eyebrow">PERFORMANCE</span><h1>Assessments</h1><p>Weekly quizzes and supervisor performance reviews.</p></div><div class="dashboard-card table-card"><div class="table-scroll"><table><thead><tr><th>Quiz</th><th>Intern</th><th>Score</th><th>Result</th><th>Date</th></tr></thead><tbody>@foreach (var a in attempts) { <tr><td>@a.Quiz?.Title</td><td>@a.InternProfile?.UserAccount?.FullName</td><td>@a.Score%</td><td>@(a.Passed ? "Passed" : "Needs improvement")</td><td>@a.SubmittedAt.ToLocalTime().ToString("dd MMM yyyy")</td></tr> } @if (!attempts.Any()) { <tr><td colspan="5">No quiz attempts recorded yet.</td></tr> }</tbody></table></div></div><a class="back-link" href="/Dashboard">← Back to dashboard</a></div>
