@@ -1,15 +1,627 @@
-generator client { provider = "prisma-client-js" }
-datasource db { provider = "postgresql"; url = env("DATABASE_URL") }
+generator client {
+  provider = "prisma-client-js"
+}
 
-enum Role { ADMIN SUPERVISOR HR INTERN }
-enum TaskStatus { TODO IN_PROGRESS REVIEW DONE }
-enum AttendanceStatus { PRESENT ABSENT LATE EXCUSED }
-model User { id String @id @default(cuid()); email String @unique; name String; role Role @default(INTERN); passwordHash String; createdAt DateTime @default(now()); intern Intern?; attendance Attendance[]; tasks Task[]; auditLogs AuditLog[] }
-model Intern { id String @id @default(cuid()); userId String @unique; user User @relation(fields:[userId], references:[id], onDelete:Cascade); department String @default("Technical Support"); progress Int @default(0); quizAverage Float @default(0); createdAt DateTime @default(now()); enrollments LearningProgress[]; evaluations WeeklyEvaluation[]; projects Project[] }
-model LearningModule { id String @id @default(cuid()); week Int @unique; title String; description String; progress LearningProgress[] }
-model LearningProgress { id String @id @default(cuid()); internId String; moduleId String; completed Boolean @default(false); score Float?; completedAt DateTime?; intern Intern @relation(fields:[internId],references:[id],onDelete:Cascade); module LearningModule @relation(fields:[moduleId],references:[id],onDelete:Cascade); @@unique([internId,moduleId]) }
-model Attendance { id String @id @default(cuid()); internId String; date DateTime; status AttendanceStatus; note String?; intern User @relation(fields:[internId],references:[id],onDelete:Cascade); @@unique([internId,date]) }
-model Task { id String @id @default(cuid()); title String; description String?; status TaskStatus @default(TODO); dueDate DateTime?; assignedToId String?; assignedTo User? @relation(fields:[assignedToId],references:[id],onDelete:SetNull); createdAt DateTime @default(now()) }
-model Project { id String @id @default(cuid()); title String; description String?; status TaskStatus @default(TODO); grade Float?; internId String; intern Intern @relation(fields:[internId],references:[id],onDelete:Cascade); createdAt DateTime @default(now()) }
-model WeeklyEvaluation { id String @id @default(cuid()); internId String; week Int; technicalScore Float; cybersecurityScore Float; attendanceScore Float; supervisorScore Float; totalScore Float; intern Intern @relation(fields:[internId],references:[id],onDelete:Cascade); @@unique([internId,week]) }
-model AuditLog { id String @id @default(cuid()); userId String?; action String; entity String; entityId String?; metadata Json?; createdAt DateTime @default(now()); user User? @relation(fields:[userId],references:[id],onDelete:SetNull) }
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  ADMIN
+  SUPERVISOR
+  HR
+  INTERN
+}
+
+enum TaskStatus {
+  TODO
+  IN_PROGRESS
+  REVIEW
+  DONE
+}
+
+enum AttendanceStatus {
+  PRESENT
+  ABSENT
+  LATE
+  EXCUSED
+}
+
+enum InternStatus {
+  APPLICANT
+  PENDING_VERIFICATION
+  APPROVED
+  ACTIVE
+  ON_LEAVE
+  SUSPENDED
+  COMPLETED
+  WITHDRAWN
+}
+
+enum ReportStatus {
+  DRAFT
+  SUBMITTED
+  UNDER_REVIEW
+  APPROVED
+  REJECTED
+}
+
+enum Priority {
+  CRITICAL
+  HIGH
+  MEDIUM
+  LOW
+}
+
+enum FlagLevel {
+  RED
+  AMBER
+  GREEN
+  EXCELLENT
+}
+
+enum ProjectStatus {
+  TODO
+  IN_PROGRESS
+  REVIEW
+  DONE
+}
+
+model User {
+  id           String       @id @default(cuid())
+  email        String       @unique
+  name         String
+  role         Role         @default(INTERN)
+  passwordHash String
+  createdAt    DateTime     @default(now())
+  intern       Intern?
+  supervisor   Supervisor?
+  attendance   Attendance[]
+  tasks        Task[]
+  auditLogs    AuditLog[]
+  notifications Notification[]
+  announcements Announcement[]
+  reportsReviewed WeeklyReport[] @relation("ReportReviewer")
+}
+
+model Department {
+  id        String   @id @default(cuid())
+  name      String   @unique
+  createdAt DateTime @default(now())
+  interns   Intern[]
+  supervisors Supervisor[]
+}
+
+model School {
+  id        String   @id @default(cuid())
+  name      String   @unique
+  createdAt DateTime @default(now())
+  interns   Intern[]
+}
+
+model Program {
+  id          String        @id @default(cuid())
+  name        String        @unique
+  description String?
+  startDate   DateTime?
+  endDate     DateTime?
+  createdAt   DateTime      @default(now())
+  interns     Intern[]
+  weeks       ProgramWeek[]
+}
+
+model ProgramWeek {
+  id          String   @id @default(cuid())
+  programId   String
+  week        Int
+  title       String
+  description String
+  objectives  Json?
+  technical   Json?
+  cybersecurity Json?
+  credlock    Json?
+  practical  Json?
+  deliverable String?
+  assessment  Json?
+  tools       Json?
+  program     Program  @relation(fields: [programId], references: [id], onDelete: Cascade)
+  modules     LearningModule[]
+  @@unique([programId, week])
+  @@index([programId])
+}
+
+model Supervisor {
+  id           String      @id @default(cuid())
+  userId       String      @unique
+  departmentId String?
+  user         User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  department   Department? @relation(fields: [departmentId], references: [id], onDelete: SetNull)
+  interns      Intern[]
+  evaluations  WeeklyEvaluation[]
+  projectReviews ProjectReview[]
+  @@index([departmentId])
+}
+
+model Intern {
+  id              String        @id @default(cuid())
+  userId          String        @unique
+  internId        String        @unique
+  departmentId    String?
+  schoolId        String?
+  programId       String?
+  supervisorId    String?
+  programmeLevel  String?
+  phone           String?
+  address         String?
+  state           String?
+  bio             String?
+  photoUrl        String?
+  status          InternStatus   @default(APPLICANT)
+  startDate       DateTime?
+  endDate         DateTime?
+  progress        Int            @default(0)
+  quizAverage     Float          @default(0)
+  createdAt       DateTime       @default(now())
+  updatedAt       DateTime       @updatedAt
+  user            User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  department     Department?     @relation(fields: [departmentId], references: [id], onDelete: SetNull)
+  school         School?         @relation(fields: [schoolId], references: [id], onDelete: SetNull)
+  program        Program?        @relation(fields: [programId], references: [id], onDelete: SetNull)
+  supervisor     Supervisor?     @relation(fields: [supervisorId], references: [id], onDelete: SetNull)
+  enrollments    LearningProgress[]
+  evaluations    WeeklyEvaluation[]
+  projects       Project[]
+  dailyLogs      DailyActivityLog[]
+  weeklyReports  WeeklyReport[]
+  quizAttempts   QuizAttempt[]
+  skills         InternSkill[]
+  documents      Document[]
+  leaveRequests  LeaveRequest[]
+  incidents      IncidentReport[]
+  performance    PerformanceRecord[]
+  competencyAssessments CompetencyAssessment[]
+  projectSubmissions ProjectSubmission[]
+  @@index([departmentId])
+  @@index([schoolId])
+  @@index([programId])
+  @@index([supervisorId])
+  @@index([status])
+}
+
+model LearningModule {
+  id          String        @id @default(cuid())
+  week        Int
+  title       String
+  description String
+  programWeekId String?
+  programWeek ProgramWeek? @relation(fields: [programWeekId], references: [id], onDelete: SetNull)
+  progress    LearningProgress[]
+  objectives  LearningObjective[]
+  @@unique([week, programWeekId])
+  @@index([programWeekId])
+}
+
+model LearningObjective {
+  id          String @id @default(cuid())
+  moduleId    String
+  objective   String
+  order       Int    @default(0)
+  module      LearningModule @relation(fields: [moduleId], references: [id], onDelete: Cascade)
+  @@index([moduleId, order])
+}
+
+model LearningProgress {
+  id          String    @id @default(cuid())
+  internId    String
+  moduleId    String
+  completed   Boolean   @default(false)
+  score       Float?
+  completedAt DateTime?
+  intern      Intern    @relation(fields: [internId], references: [id], onDelete: Cascade)
+  module      LearningModule @relation(fields: [moduleId], references: [id], onDelete: Cascade)
+  @@unique([internId, moduleId])
+}
+
+model Attendance {
+  id       String           @id @default(cuid())
+  internId String
+  date     DateTime
+  status   AttendanceStatus
+  note     String?
+  intern   User             @relation(fields: [internId], references: [id], onDelete: Cascade)
+  @@unique([internId, date])
+  @@index([date])
+}
+
+model AttendanceAdjustment {
+  id           String           @id @default(cuid())
+  attendanceId String
+  reason       String
+  adjustedById String
+  createdAt    DateTime         @default(now())
+  attendance  Attendance       @relation(fields: [attendanceId], references: [id], onDelete: Cascade)
+  adjustedBy   User             @relation(fields: [adjustedById], references: [id], onDelete: Restrict)
+  @@index([attendanceId])
+}
+
+model Task {
+  id           String     @id @default(cuid())
+  title        String
+  description  String?
+  status       TaskStatus @default(TODO)
+  priority     Priority   @default(MEDIUM)
+  dueDate      DateTime?
+  assignedToId String?
+  createdById  String?
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
+  assignedTo   User?      @relation("TaskAssignee", fields: [assignedToId], references: [id], onDelete: SetNull)
+  createdBy    User?      @relation("TaskCreator", fields: [createdById], references: [id], onDelete: SetNull)
+  comments     TaskComment[]
+  @@index([assignedToId])
+  @@index([status, dueDate])
+}
+
+model TaskComment {
+  id        String   @id @default(cuid())
+  taskId    String
+  userId    String
+  comment   String
+  createdAt DateTime @default(now())
+  task      Task     @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  @@index([taskId])
+}
+
+model DailyActivityLog {
+  id          String   @id @default(cuid())
+  internId    String
+  date        DateTime
+  activity    String
+  learning    String?
+  technicalTask String?
+  cybersecurityNote String?
+  reflection  String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  intern      Intern   @relation(fields: [internId], references: [id], onDelete: Cascade)
+  @@unique([internId, date])
+  @@index([date])
+}
+
+model WeeklyReport {
+  id          String       @id @default(cuid())
+  internId    String
+  week        Int
+  summary     String
+  achievements String?
+  challenges  String?
+  learning    String?
+  status      ReportStatus @default(DRAFT)
+  reviewerId  String?
+  reviewNote  String?
+  submittedAt DateTime?
+  reviewedAt  DateTime?
+  intern      Intern       @relation(fields: [internId], references: [id], onDelete: Cascade)
+  reviewer    User?        @relation("ReportReviewer", fields: [reviewerId], references: [id], onDelete: SetNull)
+  @@unique([internId, week])
+  @@index([reviewerId, status])
+}
+
+model QuizCategory {
+  id        String @id @default(cuid())
+  name      String @unique
+  weight    Float
+  questions QuizQuestion[]
+}
+
+model Quiz {
+  id          String @id @default(cuid())
+  week        Int
+  title       String
+  description String?
+  categories QuizCategory[]
+  questions  QuizQuestion[]
+  attempts   QuizAttempt[]
+  createdAt  DateTime @default(now())
+  @@unique([week])
+}
+
+model QuizQuestion {
+  id          String @id @default(cuid())
+  quizId      String
+  categoryId  String
+  question   String
+  explanation String?
+  options     QuizOption[]
+  quiz        Quiz             @relation(fields: [quizId], references: [id], onDelete: Cascade)
+  category    QuizCategory     @relation(fields: [categoryId], references: [id], onDelete: Restrict)
+  @@index([quizId])
+  @@index([categoryId])
+}
+
+model QuizOption {
+  id          String @id @default(cuid())
+  questionId  String
+  text        String
+  isCorrect   Boolean @default(false)
+  question    QuizQuestion @relation(fields: [questionId], references: [id], onDelete: Cascade)
+  @@index([questionId])
+}
+
+model QuizAttempt {
+  id          String   @id @default(cuid())
+  internId    String
+  quizId      String
+  score       Float?
+  startedAt   DateTime @default(now())
+  submittedAt DateTime?
+  intern      Intern   @relation(fields: [internId], references: [id], onDelete: Cascade)
+  quiz        Quiz     @relation(fields: [quizId], references: [id], onDelete: Cascade)
+  answers     QuizAnswer[]
+  @@index([internId, quizId])
+}
+
+model QuizAnswer {
+  id          String @id @default(cuid())
+  attemptId   String
+  questionId  String
+  optionId    String?
+  isCorrect   Boolean?
+  attempt     QuizAttempt  @relation(fields: [attemptId], references: [id], onDelete: Cascade)
+  question    QuizQuestion @relation(fields: [questionId], references: [id], onDelete: Restrict)
+  option      QuizOption?  @relation(fields: [optionId], references: [id], onDelete: SetNull)
+  @@unique([attemptId, questionId])
+}
+
+model Skill {
+  id          String @id @default(cuid())
+  name        String @unique
+  category    String?
+  description String?
+  internSkills InternSkill[]
+}
+
+model InternSkill {
+  id        String @id @default(cuid())
+  internId  String
+  skillId   String
+  score     Float?
+  assessedAt DateTime?
+  intern    Intern @relation(fields: [internId], references: [id], onDelete: Cascade)
+  skill     Skill  @relation(fields: [skillId], references: [id], onDelete: Cascade)
+  @@unique([internId, skillId])
+}
+
+model Training {
+  id          String @id @default(cuid())
+  title       String
+  description String?
+  provider    String?
+  date        DateTime?
+  attendees   TrainingAttendance[]
+}
+
+model TrainingAttendance {
+  id         String @id @default(cuid())
+  trainingId String
+  internId   String
+  attended   Boolean @default(false)
+  training   Training @relation(fields: [trainingId], references: [id], onDelete: Cascade)
+  intern     Intern   @relation(fields: [internId], references: [id], onDelete: Cascade)
+  @@unique([trainingId, internId])
+}
+
+model Project {
+  id          String        @id @default(cuid())
+  title       String
+  description String?
+  status      ProjectStatus  @default(TODO)
+  grade       Float?
+  internId    String
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+  intern      Intern        @relation(fields: [internId], references: [id], onDelete: Cascade)
+  milestones  ProjectMilestone[]
+  submissions ProjectSubmission[]
+  reviews     ProjectReview[]
+  @@index([internId, status])
+}
+
+model ProjectMilestone {
+  id          String @id @default(cuid())
+  projectId   String
+  title       String
+  description String?
+  dueDate     DateTime?
+  completedAt DateTime?
+  project     Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  @@index([projectId])
+}
+
+model ProjectSubmission {
+  id          String   @id @default(cuid())
+  projectId   String
+  internId    String
+  url         String?
+  notes       String?
+  submittedAt DateTime @default(now())
+  project     Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  intern      Intern  @relation(fields: [internId], references: [id], onDelete: Cascade)
+  @@index([projectId, internId])
+}
+
+model ProjectReview {
+  id           String   @id @default(cuid())
+  projectId    String
+  reviewerId   String
+  score        Float?
+  feedback     String?
+  reviewedAt   DateTime @default(now())
+  project      Project    @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  reviewer     Supervisor @relation(fields: [reviewerId], references: [id], onDelete: Cascade)
+  @@index([projectId])
+}
+
+model Evaluation {
+  id          String   @id @default(cuid())
+  internId    String
+  month       Int
+  year        Int
+  totalScore  Float
+  createdAt   DateTime @default(now())
+  intern      Intern @relation(fields: [internId], references: [id], onDelete: Cascade)
+  scores      EvaluationScore[]
+  @@unique([internId, month, year])
+}
+
+model EvaluationScore {
+  id           String @id @default(cuid())
+  evaluationId String
+  competency   String
+  weight       Float
+  score        Float
+  evaluation   Evaluation @relation(fields: [evaluationId], references: [id], onDelete: Cascade)
+  @@unique([evaluationId, competency])
+}
+
+model CompetencyPillar {
+  id          String @id @default(cuid())
+  name        String @unique
+  description String?
+  assessments CompetencyAssessment[]
+}
+
+model CompetencyAssessment {
+  id        String @id @default(cuid())
+  internId  String
+  pillarId  String
+  score     Float
+  assessedAt DateTime @default(now())
+  intern    Intern @relation(fields: [internId], references: [id], onDelete: Cascade)
+  pillar    CompetencyPillar @relation(fields: [pillarId], references: [id], onDelete: Cascade)
+  @@unique([internId, pillarId])
+}
+
+model WeeklyEvaluation {
+  id                   String @id @default(cuid())
+  internId             String
+  week                  Int
+  technicalScore       Float
+  cybersecurityScore   Float
+  attendanceScore      Float
+  supervisorScore      Float
+  totalScore           Float
+  supervisorId         String?
+  intern                Intern @relation(fields: [internId], references: [id], onDelete: Cascade)
+  supervisor            Supervisor? @relation(fields: [supervisorId], references: [id], onDelete: SetNull)
+  @@unique([internId, week])
+  @@index([supervisorId])
+}
+
+model PerformanceRecord {
+  id          String    @id @default(cuid())
+  internId    String
+  periodType  String
+  periodStart DateTime
+  periodEnd   DateTime
+  score       Float
+  flag        FlagLevel
+  createdAt   DateTime  @default(now())
+  intern      Intern    @relation(fields: [internId], references: [id], onDelete: Cascade)
+  @@index([internId, periodType, periodStart])
+}
+
+model PerformanceFlag {
+  id          String    @id @default(cuid())
+  internId    String
+  level       FlagLevel
+  reason      String
+  createdAt   DateTime  @default(now())
+  resolvedAt  DateTime?
+  intern      Intern    @relation(fields: [internId], references: [id], onDelete: Cascade)
+  @@index([internId, level, createdAt])
+}
+
+model DocumentType {
+  id          String     @id @default(cuid())
+  name        String     @unique
+  required    Boolean    @default(false)
+  documents   Document[]
+}
+
+model Document {
+  id            String       @id @default(cuid())
+  internId      String
+  typeId        String
+  fileUrl       String
+  fileName      String
+  verified      Boolean      @default(false)
+  uploadedAt    DateTime     @default(now())
+  verifiedAt    DateTime?
+  type          DocumentType @relation(fields: [typeId], references: [id], onDelete: Restrict)
+  intern        Intern       @relation(fields: [internId], references: [id], onDelete: Cascade)
+  @@index([internId, typeId])
+}
+
+model LeaveRequest {
+  id          String   @id @default(cuid())
+  internId    String
+  startDate   DateTime
+  endDate     DateTime
+  reason      String
+  status      ReportStatus @default(DRAFT)
+  reviewedById String?
+  reviewNote  String?
+  intern      Intern  @relation(fields: [internId], references: [id], onDelete: Cascade)
+  @@index([internId, status])
+}
+
+model IncidentReport {
+  id          String   @id @default(cuid())
+  internId    String
+  title       String
+  description String
+  priority    Priority  @default(MEDIUM)
+  status      ReportStatus @default(DRAFT)
+  evidenceUrl String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  intern      Intern @relation(fields: [internId], references: [id], onDelete: Cascade)
+  @@index([internId, status])
+}
+
+model Announcement {
+  id          String   @id @default(cuid())
+  title       String
+  body        String
+  createdById String
+  createdAt   DateTime @default(now())
+  createdBy   User     @relation(fields: [createdById], references: [id], onDelete: Restrict)
+  @@index([createdAt])
+}
+
+model Notification {
+  id        String   @id @default(cuid())
+  userId    String
+  title     String
+  message   String
+  read      Boolean  @default(false)
+  createdAt DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  @@index([userId, read, createdAt])
+}
+
+model AuditLog {
+  id        String   @id @default(cuid())
+  userId    String?
+  action    String
+  entity    String
+  entityId  String?
+  metadata  Json?
+  createdAt DateTime @default(now())
+  user      User?   @relation(fields: [userId], references: [id], onDelete: SetNull)
+  @@index([entity, entityId])
+  @@index([createdAt])
+}
