@@ -1,0 +1,15 @@
+generator client { provider = "prisma-client-js" }
+datasource db { provider = "postgresql"; url = env("DATABASE_URL") }
+
+enum Role { ADMIN SUPERVISOR HR INTERN }
+enum TaskStatus { TODO IN_PROGRESS REVIEW DONE }
+enum AttendanceStatus { PRESENT ABSENT LATE EXCUSED }
+model User { id String @id @default(cuid()); email String @unique; name String; role Role @default(INTERN); passwordHash String; createdAt DateTime @default(now()); intern Intern?; attendance Attendance[]; tasks Task[]; auditLogs AuditLog[] }
+model Intern { id String @id @default(cuid()); userId String @unique; user User @relation(fields:[userId], references:[id], onDelete:Cascade); department String @default("Technical Support"); progress Int @default(0); quizAverage Float @default(0); createdAt DateTime @default(now()); enrollments LearningProgress[]; evaluations WeeklyEvaluation[]; projects Project[] }
+model LearningModule { id String @id @default(cuid()); week Int @unique; title String; description String; progress LearningProgress[] }
+model LearningProgress { id String @id @default(cuid()); internId String; moduleId String; completed Boolean @default(false); score Float?; completedAt DateTime?; intern Intern @relation(fields:[internId],references:[id],onDelete:Cascade); module LearningModule @relation(fields:[moduleId],references:[id],onDelete:Cascade); @@unique([internId,moduleId]) }
+model Attendance { id String @id @default(cuid()); internId String; date DateTime; status AttendanceStatus; note String?; intern User @relation(fields:[internId],references:[id],onDelete:Cascade); @@unique([internId,date]) }
+model Task { id String @id @default(cuid()); title String; description String?; status TaskStatus @default(TODO); dueDate DateTime?; assignedToId String?; assignedTo User? @relation(fields:[assignedToId],references:[id],onDelete:SetNull); createdAt DateTime @default(now()) }
+model Project { id String @id @default(cuid()); title String; description String?; status TaskStatus @default(TODO); grade Float?; internId String; intern Intern @relation(fields:[internId],references:[id],onDelete:Cascade); createdAt DateTime @default(now()) }
+model WeeklyEvaluation { id String @id @default(cuid()); internId String; week Int; technicalScore Float; cybersecurityScore Float; attendanceScore Float; supervisorScore Float; totalScore Float; intern Intern @relation(fields:[internId],references:[id],onDelete:Cascade); @@unique([internId,week]) }
+model AuditLog { id String @id @default(cuid()); userId String?; action String; entity String; entityId String?; metadata Json?; createdAt DateTime @default(now()); user User? @relation(fields:[userId],references:[id],onDelete:SetNull) }
