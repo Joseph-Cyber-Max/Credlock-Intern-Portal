@@ -7,14 +7,66 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-enum Role { ADMIN SUPERVISOR HR INTERN }
-enum TaskStatus { TODO IN_PROGRESS REVIEW DONE }
-enum AttendanceStatus { PRESENT ABSENT LATE EXCUSED }
-enum InternStatus { APPLICANT PENDING_VERIFICATION APPROVED ACTIVE ON_LEAVE SUSPENDED COMPLETED WITHDRAWN }
-enum ReportStatus { DRAFT SUBMITTED UNDER_REVIEW APPROVED REJECTED }
-enum Priority { CRITICAL HIGH MEDIUM LOW }
-enum FlagLevel { RED AMBER GREEN EXCELLENT }
-enum ProjectStatus { TODO IN_PROGRESS REVIEW DONE }
+enum Role {
+  ADMIN
+  SUPERVISOR
+  HR
+  INTERN
+}
+
+enum TaskStatus {
+  TODO
+  IN_PROGRESS
+  REVIEW
+  DONE
+}
+
+enum AttendanceStatus {
+  PRESENT
+  ABSENT
+  LATE
+  EXCUSED
+}
+
+enum InternStatus {
+  APPLICANT
+  PENDING_VERIFICATION
+  APPROVED
+  ACTIVE
+  ON_LEAVE
+  SUSPENDED
+  COMPLETED
+  WITHDRAWN
+}
+
+enum ReportStatus {
+  DRAFT
+  SUBMITTED
+  UNDER_REVIEW
+  APPROVED
+  REJECTED
+}
+
+enum Priority {
+  CRITICAL
+  HIGH
+  MEDIUM
+  LOW
+}
+
+enum FlagLevel {
+  RED
+  AMBER
+  GREEN
+  EXCELLENT
+}
+
+enum ProjectStatus {
+  TODO
+  IN_PROGRESS
+  REVIEW
+  DONE
+}
 
 model User {
   id String @id @default(cuid())
