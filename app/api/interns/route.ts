@@ -1,27 +1,29 @@
-import {NextResponse} from "next/server";
-import {db} from "@/lib/db";
-import {getServerSession} from "@/lib/server-session";
+import { NextResponse } from "next/server";
+import { db } from "@/lib/db";
+import { getServerSession } from "@/lib/server-session";
 
-export async function GET(){
-  const s=await getServerSession();
-  if(!s)return NextResponse.json({error:"Unauthorized"},{status:401});
+export async function GET() {
+  const session = await getServerSession();
+  if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
-  const where=s.role==="INTERN"?{userId:s.id}:undefined;
-  const interns=await db.intern.findMany({
+  const where = session.role === "INTERN" ? { userId: session.id } : undefined;
+  const interns = await db.intern.findMany({
     where,
-    include:{user:true,enrollments:true,evaluations:true,projects:true},
-    orderBy:{createdAt:"desc"}
+    include: { user: true, department: true, enrollments: true, evaluations: true, projects: true },
+    orderBy: { createdAt: "desc" },
   });
 
-  return NextResponse.json(interns.map(i=>({
-    id:i.id,
-    name:i.user.name,
-    email:i.user.email,
-    role:i.user.role,
-    department:i.department,
-    progress:i.progress,
-    quizAverage:i.quizAverage,
-    modulesCompleted:i.enrollments.filter(x=>x.completed).length,
-    projects:i.projects.length
+  return NextResponse.json(interns.map((intern) => ({
+    id: intern.id,
+    internId: intern.internId,
+    name: intern.user.name,
+    email: intern.user.email,
+    role: intern.user.role,
+    department: intern.department?.name ?? "Unassigned",
+    status: intern.status,
+    progress: intern.progress,
+    quizAverage: intern.quizAverage,
+    modulesCompleted: intern.enrollments.filter((item) => item.completed).length,
+    projects: intern.projects.length,
   })));
 }
